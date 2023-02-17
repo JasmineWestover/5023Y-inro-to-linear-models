@@ -120,6 +120,7 @@ means %>%
     ymax=upper.CL))
 
 # 13.5 Assumption Checking ----
+
 # our linear model is a GOLEM- it does what I tell it to do- the golem follows assumptions and we have to check whether these assumptions are being adequately met.
 # Assumptions = data is normally distributed & residual variance is approx. equal between groups.
 # Once again we can either use an R based function or a tidyverse function to check the assumptions of linear models
@@ -129,3 +130,8 @@ plot(lsmodel1)                      # Tidyverse function to test assumptions
 ## 13.5.1 Normal Distribution ------
 performance::check_model(lsmodel1, check=c("normality","qq"))
 plot(lsmodel1, which=c(2,2))
+
+### 13.5.1.1 What is Quantile-Quantile (QQ) plot? ----
+# QQ plot is used to check whether a sample distribution is the same as another. 
+# The qqplot distributes the data on the y-axis, & theoretical normal distribution on the x-axis.
+# If the residuals follow a normal distribution, they should meet to produce a perfect diagonal line acoss the plot. 
