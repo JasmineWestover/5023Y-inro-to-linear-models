@@ -3,6 +3,7 @@ library(tidyverse)
 library(GGally)
 library(emmeans)
 library(performance)
+library(broom.helpers)
 
 # _______________________________ ####
 
@@ -14,16 +15,20 @@ lsmodel0 <- lm(formula = height ~ 1, data = darwin)
 # _____________________________ ####
 
 # 13.2 Summaries for Models ----
+
 # investigate a summary of the model using summary function (seen below)
 summary(lsmodel0)
 
 ## 13.2.1 Broom ----
+
 # this summarizes key info about models in tidy tibble(s)
 broom::tidy(lsmodel0)  # summarize info about model components
 broom::glance(lsmodel0) # reports info about the entire model
 broom::augment(lsmodel0) # adds info about individual observations to a dataset and it can be used to model
                          # predictions onto a new dataset
+
 ## 13.2.2 Model Summary ----
+
 # Can use either basic R function or a tidyverse function
 # Can use the basic R summary function as seen above
 # Can use the tidyverse broom tidy function as seen above
@@ -33,6 +38,7 @@ broom::augment(lsmodel0) # adds info about individual observations to a dataset 
 mean(darwin$height)  # answer = 18.88333 (rounded = 18.9)
 
 ## 13.2.3 Compare Means ----
+
 # we want a linear model that can analyse the differences in average plant height, can use the lm() function
 lsmodel1 <- lm(height ~ type, data=darwin)
 
@@ -60,17 +66,20 @@ darwin %>%
   theme_bw()
 
 ## 13.2.4 Standard error of the difference -----
+
 # LM output provides the standard errors of the values.
 # The first row calculates mean & standard error of the mean(SEM).
 # As the second row provides the mean difference- the standard error of the difference between the two means (SED) is provided, which can also be calculated using a formula.
 
 # 13.3 Confidence Intervals ----
+
 # can once again either a base R function or a tidyverse one to calculate the confidence intervals
 confint(lsmodel1) # base R
 broom::tidy(lsmodel1, conf.int=T) # tidyverse
 # the bounds provided were 2.5% and 97.5% of a t-distribution
 
 # 13.4 Answering the Question -------
+
 # Original Hypothesis = self-pollination reduces fitness (height)
 # Null hypothesis = no effect of pollination & no difference in average heights. Can we accept or reject this based on analysis & with what level of confidence?
 # If the null hypothesis' predicted value lies within the 95% CI for the difference of the mean, we can decide whether to reject or not
@@ -80,4 +89,43 @@ broom::tidy(lsmodel1, conf.int=T) # tidyverse
 # the below function, produces a graph of the estimated mean difference with an approx 95% CI
 GGally::ggcoef_model(lsmodel1,
                      show_p_values=FALSE, 
-                     conf.level=0.95)
+                     conf.level=0.99)      # edited to 0.99 from 0.95
+
+# can also include this argument in the tidy() function if we wish to:
+broom::tidy(lsmodel1, conf.int=T, conf.level=0.99)
+
+## 13.4.1 Getting the other treatment mean & standard error -----
+
+# to calculate the "other" mean and SE for the self treatment can use the function below
+darwin %>% 
+  mutate(type=factor(type)) %>% 
+  mutate(type=fct_relevel(type, c("Self", "Cross"))) %>% 
+  lm(height~type, data=.) %>% 
+  broom::tidy()
+
+## 13.4.2 Emmeans ----
+
+# can use the emmeans function to do a similar thing as mentioned above
+means <- emmeans::emmeans(lsmodel1, specs = ~ type)
+means
+
+# this provides the mean, SE & 95% CI estimates of all levels at once from the model. 
+# seen below is another use for emmeans, where it can provide a summary to include in data visuals. 
+means %>% 
+  as_tibble() %>% 
+  ggplot(aes(x=type, 
+             y=emmean))+
+  geom_pointrange(aes(
+    ymin=lower.CL, 
+    ymax=upper.CL))
+
+# 13.5 Assumption Checking ----
+# our linear model is a GOLEM- it does what I tell it to do- the golem follows assumptions and we have to check whether these assumptions are being adequately met.
+# Assumptions = data is normally distributed & residual variance is approx. equal between groups.
+# Once again we can either use an R based function or a tidyverse function to check the assumptions of linear models
+performance::check_model(lsmodel1)  # Base R function to test assumptions
+plot(lsmodel1)                      # Tidyverse function to test assumptions
+
+## 13.5.1 Normal Distribution ------
+performance::check_model(lsmodel1, check=c("normality","qq"))
+plot(lsmodel1, which=c(2,2))
