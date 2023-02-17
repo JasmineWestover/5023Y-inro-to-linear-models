@@ -4,7 +4,7 @@ library(kableExtra)
 
 darwin <- read_csv(here("data", "darwin.csv"))
 
-#Hypothesis trying to answer during data analysis is whether 'inbreeding reduced the fitness of the selfed plants'
+# Hypothesis trying to answer during data analysis is whether 'inbreeding reduced the fitness of the selfed plants'
 
 # 12.2 Activity 1- Basic Exploratory Data Analysis ----
 
