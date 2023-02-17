@@ -64,3 +64,20 @@ darwin %>%
 # The first row calculates mean & standard error of the mean(SEM).
 # As the second row provides the mean difference- the standard error of the difference between the two means (SED) is provided, which can also be calculated using a formula.
 
+# 13.3 Confidence Intervals ----
+# can once again either a base R function or a tidyverse one to calculate the confidence intervals
+confint(lsmodel1) # base R
+broom::tidy(lsmodel1, conf.int=T) # tidyverse
+# the bounds provided were 2.5% and 97.5% of a t-distribution
+
+# 13.4 Answering the Question -------
+# Original Hypothesis = self-pollination reduces fitness (height)
+# Null hypothesis = no effect of pollination & no difference in average heights. Can we accept or reject this based on analysis & with what level of confidence?
+# If the null hypothesis' predicted value lies within the 95% CI for the difference of the mean, we can decide whether to reject or not
+# The upper & lower bounds of the confidence intervals do not cross 0
+# The difference in height is consistent with Darwin's  alternate hypothesis of inbreeding depression.
+
+# the below function, produces a graph of the estimated mean difference with an approx 95% CI
+GGally::ggcoef_model(lsmodel1,
+                     show_p_values=FALSE, 
+                     conf.level=0.95)
