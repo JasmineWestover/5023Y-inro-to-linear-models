@@ -134,4 +134,40 @@ plot(lsmodel1, which=c(2,2))
 ### 13.5.1.1 What is Quantile-Quantile (QQ) plot? ----
 # QQ plot is used to check whether a sample distribution is the same as another. 
 # The qqplot distributes the data on the y-axis, & theoretical normal distribution on the x-axis.
-# If the residuals follow a normal distribution, they should meet to produce a perfect diagonal line acoss the plot. 
+# If the residuals follow a normal distribution, they should meet to produce a perfect diagonal line across the plot. 
+# Most residuals can be explained by a normal distribution, except at the extreme low end of our data.
+# Fit not perfect, but not terrible.
+
+## 13.5.2 Equal Variance ----
+performance::check_model(lsmodel1, check="homogeneity")
+plot(lsmodel1, which=c(1,3))
+
+# To assess if variances are equal we can plot the residuals (variance) of our data against the fitted (predicted) values.
+# Residuals = 0, there would be no error, and our data exactly matches the estimates. This realistically does not happen.
+# the check_models plot provides 'standardized residuals' - where we divide the residual error by the standard deviation.
+# higher fitted values (Cross treatment) appears to be more variable than the lower fitted values.
+
+## 13.5.3 Outliers ----
+# we can check how much of an effect the outliers might be having on the model estimates (means).
+performance::check_model(lsmodel1, check="outliers")
+plot(lsmodel1, which=c(4,4))
+
+# The value which the data points are being measured against is called Cook's distance. 
+# Cook's Distance = how much 'leverage' a single data point is exerting on the model, if it is too high, it may be having an outsized effect on the estimates.
+
+# 13.6 Summary ----
+# Our model isn't perfect, but it is reasonably good. 
+# In this example we used a students t-test, not a paired one (will be implemented later - the plants are paired)
+# lm sets one factor as 'intercept' estimates the mean, and the line is the difference in means between the two treatments. 
+# The difference in means is always accompanied by a SED, which can be used to calculate a 95% confidence interval.
+# If this confidence interval does not contain the intercept value, we can reject the null hypothesis that there is 'no effect'.
+
+darwin %>% 
+  ggplot(aes(x=type, 
+             y=height))+
+  geom_jitter(width=0.1, 
+              pch=21, 
+              aes(fill=type))+
+  theme_classic()+
+  geom_segment(aes(x=1, xend=2, y=20.192, yend=20.192-2.617), linetype="dashed")+
+  stat_summary(fun.y=mean, geom="crossbar", width=0.2)
