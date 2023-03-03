@@ -209,6 +209,9 @@ janka %>%
   ggplot(aes(x=dens, y=hardness))+
   geom_point()+
   geom_smooth(method = "lm")+
+  geom_point()
   labs(x="Density", y="Timber Hardness")+
   theme_bw()
 
+
+# need to figure out how to add the second dataframe (predictions) to my ggplot
